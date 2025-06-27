@@ -14,181 +14,216 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Gestor de Stock y Compras</h1>
-    <p><strong>Dinero disponible:</strong> $<span id="dinero">1000</span></p>
-    <button onclick="clickDinero()">Haz clic 10 veces para ganar $100</button> <span id="clicks">0/10</span>
+<div class="container">
+  <h1>Gestor de Stock y Compras</h1>
+  <p><strong>Dinero disponible:</strong> $<span id="dinero">1000</span></p>
+  <button onclick="clickDinero()">Haz clic 10 veces para ganar $100</button> <span id="clicks">0/10</span>
 
-    <h2>Agregar Producto al Stock</h2>
-    <div>
-      <input type="text" id="nombre" placeholder="Nombre del producto">
-      <input type="text" id="categoria" placeholder="Categoría">
-      <input type="number" id="precio" placeholder="Precio" min="0">
-      <input type="number" id="cantidad" placeholder="Cantidad" min="1">
-      <button onclick="agregarProducto()">Agregar</button>
-    </div>
-
-    <h2>Productos Disponibles</h2>
-    <table id="tablaProductos">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Categoría</th>
-          <th>Precio</th>
-          <th>Cantidad Disponible</th>
-          <th>Comprar</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Productos serán insertados aquí -->
-      </tbody>
-    </table>
-
-    <h2>Inventario Personal</h2>
-    <table id="inventario">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Categoría</th>
-          <th>Cantidad</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Inventario será llenado dinámicamente -->
-      </tbody>
-    </table>
+  <h2>Agregar Producto al Stock</h2>
+  <div>
+    <input type="text" id="nombre" placeholder="Nombre del producto">
+    <input type="text" id="categoria" placeholder="Categoría">
+    <input type="number" id="precio" placeholder="Precio" min="0">
+    <input type="number" id="cantidad" placeholder="Cantidad" min="1">
+    <button onclick="agregarProducto()">Agregar</button>
   </div>
 
-  <script>
-    let dinero = 1000;
-    let productos = [];
-    let inventario = {};
-    let clickCounter = 0;
+  <h2>Productos Disponibles</h2>
+  <table id="tablaProductos">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Categoría</th>
+        <th>Precio</th>
+        <th>Cantidad Disponible</th>
+        <th>Comprar</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-    function actualizarDinero() {
-      document.getElementById("dinero").innerText = dinero;
-    }
+  <h2>Inventario Personal</h2>
+  <table id="inventario">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Categoría</th>
+        <th>Cantidad</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 
-    function clickDinero() {
-      clickCounter++;
-      document.getElementById("clicks").innerText = `${clickCounter}/10`;
-      if (clickCounter >= 10) {
-        dinero += 100;
-        clickCounter = 0;
-        actualizarDinero();
-        document.getElementById("clicks").innerText = `0/10`;
-      }
-    }
+<script>
+let dinero = 1000;
+let productos = [];
+let inventario = {};
+let clickCounter = 0;
 
-    function renderProductos() {
-      const tabla = document.querySelector("#tablaProductos tbody");
-      tabla.innerHTML = "";
+function actualizarDinero() {
+  document.getElementById("dinero").innerText = dinero;
+  document.getElementById("clicks").innerText = `${clickCounter}/10`;
+}
 
-      productos.forEach((prod, index) => {
-        if (prod.cantidad > 0) {
-          const fila = document.createElement("tr");
-
-          fila.innerHTML = `
-            <td>${prod.nombre}</td>
-            <td>${prod.categoria}</td>
-            <td>$${prod.precio}</td>
-            <td id="cant-${index}">${prod.cantidad}</td>
-            <td>
-              <input type="number" min="1" value="1" id="input-${index}">
-              <button onclick="comprar(${index})">Comprar</button>
-            </td>
-          `;
-
-          tabla.appendChild(fila);
-        }
-      });
-    }
-
-    function renderInventario() {
-      const tabla = document.querySelector("#inventario tbody");
-      tabla.innerHTML = "";
-
-      for (let key in inventario) {
-        const item = inventario[key];
-        const fila = document.createElement("tr");
-
-        fila.innerHTML = `
-          <td>${item.nombre}</td>
-          <td>${item.categoria}</td>
-          <td>${item.cantidad}</td>
-          <td><button onclick="eliminarDelInventario('${key}')">Eliminar</button></td>
-        `;
-
-        tabla.appendChild(fila);
-      }
-    }
-
-    function eliminarDelInventario(nombre) {
-      delete inventario[nombre];
-      renderInventario();
-    }
-
-    function agregarProducto() {
-      const nombre = document.getElementById('nombre').value;
-      const categoria = document.getElementById('categoria').value;
-      const precio = parseFloat(document.getElementById('precio').value);
-      const cantidad = parseInt(document.getElementById('cantidad').value);
-
-      if (!nombre || !categoria || isNaN(precio) || isNaN(cantidad)) {
-        alert("Por favor completa todos los campos correctamente.");
-        return;
-      }
-
-      productos.push({ nombre, categoria, precio, cantidad });
-      renderProductos();
-
-      document.getElementById('nombre').value = "";
-      document.getElementById('categoria').value = "";
-      document.getElementById('precio').value = "";
-      document.getElementById('cantidad').value = "";
-    }
-
-    function comprar(index) {
-      const cantidadInput = document.querySelector(`#input-${index}`);
-      const cantidad = parseInt(cantidadInput.value);
-      const producto = productos[index];
-
-      if (isNaN(cantidad) || cantidad <= 0) {
-        alert("Cantidad inválida");
-        return;
-      }
-
-      if (producto.cantidad < cantidad) {
-        alert("No hay suficiente stock disponible");
-        return;
-      }
-
-      const total = producto.precio * cantidad;
-      if (total > dinero) {
-        alert("No tienes suficiente dinero");
-        return;
-      }
-
-      dinero -= total;
-      actualizarDinero();
-      producto.cantidad -= cantidad;
-
-      if (!inventario[producto.nombre]) {
-        inventario[producto.nombre] = {
-          nombre: producto.nombre,
-          categoria: producto.categoria,
-          cantidad: 0
-        };
-      }
-
-      inventario[producto.nombre].cantidad += cantidad;
-
-      renderProductos();
-      renderInventario();
-    }
-
+function clickDinero() {
+  clickCounter++;
+  document.getElementById("clicks").innerText = `${clickCounter}/10`;
+  if (clickCounter >= 10) {
+    dinero += 100;
+    clickCounter = 0;
     actualizarDinero();
-  </script>
+  }
+}
+
+function guardarDatos() {
+  localStorage.setItem("dinero", dinero);
+  localStorage.setItem("inventario", JSON.stringify(inventario));
+}
+
+function cargarDatos() {
+  const d = localStorage.getItem("dinero");
+  const i = localStorage.getItem("inventario");
+  if (d !== null) dinero = parseInt(d);
+  if (i) inventario = JSON.parse(i);
+}
+
+function generarStock() {
+  const posiblesProductos = [
+    { nombre: "script", categoria: "tecnologia", precio: 5000, cantidad: () => Math.floor(Math.random() * 20) + 1 },
+    { nombre: "executor", categoria: "tecnologia", precio: 10000, cantidad: () => 1 },
+    { nombre: "papa", categoria: "familia", precio: 125255, cantidad: () => 1 },
+    { nombre: "mama", categoria: "familia", precio: 2, cantidad: () => 1 },
+    { nombre: "comodin", categoria: "util", precio: 2000, cantidad: () => 1 },
+    { nombre: "kick token", categoria: "util", precio: 6000, cantidad: () => Math.floor(Math.random() * 3) + 1 },
+    { nombre: "extralice", categoria: "utilizable", precio: 8000, cantidad: () => Math.floor(Math.random() * 2) + 1 }
+  ];
+
+  do {
+    productos = [];
+    posiblesProductos.forEach(obj => {
+      if (Math.random() < 0.1) {
+        productos.push({
+          nombre: obj.nombre,
+          categoria: obj.categoria,
+          precio: obj.precio,
+          cantidad: obj.cantidad()
+        });
+      }
+    });
+  } while (productos.length < 3);
+}
+
+function renderProductos() {
+  const tabla = document.querySelector("#tablaProductos tbody");
+  tabla.innerHTML = "";
+  productos.forEach((prod, index) => {
+    if (prod.cantidad > 0) {
+      const fila = document.createElement("tr");
+      fila.innerHTML = `
+        <td>${prod.nombre}</td>
+        <td>${prod.categoria}</td>
+        <td>$${prod.precio}</td>
+        <td id="cant-${index}">${prod.cantidad}</td>
+        <td>
+          <input type="number" min="1" value="1" id="input-${index}">
+          <button onclick="comprar(${index})">Comprar</button>
+        </td>
+      `;
+      tabla.appendChild(fila);
+    }
+  });
+}
+
+function renderInventario() {
+  const tabla = document.querySelector("#inventario tbody");
+  tabla.innerHTML = "";
+  for (let key in inventario) {
+    const item = inventario[key];
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td>${item.nombre}</td>
+      <td>${item.categoria}</td>
+      <td>${item.cantidad}</td>
+      <td><button onclick="eliminarDelInventario('${key}')">Eliminar</button></td>
+    `;
+    tabla.appendChild(fila);
+  }
+}
+
+function eliminarDelInventario(nombre) {
+  delete inventario[nombre];
+  renderInventario();
+}
+
+function agregarProducto() {
+  const nombre = document.getElementById('nombre').value;
+  const categoria = document.getElementById('categoria').value;
+  const precio = parseFloat(document.getElementById('precio').value);
+  const cantidad = parseInt(document.getElementById('cantidad').value);
+
+  if (!nombre || !categoria || isNaN(precio) || isNaN(cantidad)) {
+    alert("Por favor completa todos los campos correctamente.");
+    return;
+  }
+
+  productos.push({ nombre, categoria, precio, cantidad });
+  renderProductos();
+
+  document.getElementById('nombre').value = "";
+  document.getElementById('categoria').value = "";
+  document.getElementById('precio').value = "";
+  document.getElementById('cantidad').value = "";
+}
+
+function comprar(index) {
+  const cantidadInput = document.querySelector(`#input-${index}`);
+  const cantidad = parseInt(cantidadInput.value);
+  const producto = productos[index];
+
+  if (isNaN(cantidad) || cantidad <= 0) {
+    alert("Cantidad inválida");
+    return;
+  }
+  if (producto.cantidad < cantidad) {
+    alert("No hay suficiente stock disponible");
+    return;
+  }
+  const total = producto.precio * cantidad;
+  if (total > dinero) {
+    alert("No tienes suficiente dinero");
+    return;
+  }
+  dinero -= total;
+  producto.cantidad -= cantidad;
+  if (!inventario[producto.nombre]) {
+    inventario[producto.nombre] = {
+      nombre: producto.nombre,
+      categoria: producto.categoria,
+      cantidad: 0
+    };
+  }
+  inventario[producto.nombre].cantidad += cantidad;
+  actualizarDinero();
+  renderProductos();
+  renderInventario();
+}
+
+window.onload = () => {
+  cargarDatos();
+  generarStock();
+  actualizarDinero();
+  renderProductos();
+  renderInventario();
+};
+
+window.addEventListener("beforeunload", guardarDatos);
+setInterval(() => {
+  generarStock();
+  renderProductos();
+  guardarDatos();
+}, 120000); // cada 2 minutos
+</script>
 </body>
 </html>
